@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Cardiac AI Monitor | ECG Clinical Dashboard</title>
+    
+    <!-- External Fonts & Libraries -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<!-- Critical Alert Toast -->
+<div class="alert-toast" id="criticalToast">
+    <div class="alert-content">
+        <span class="material-symbols-outlined alert-icon">warning</span>
+        <div class="alert-message">
+            <h4>High Risk Detected</h4>
+            <p id="toastMessage">Immediate clinical attention required.</p>
+        </div>
+        <button class="alert-close" onclick="closeAlert()">✕</button>
+    </div>
+</div>
+
+<!-- Loader Overlay -->
+<div class="loader-overlay" id="loaderOverlay">
+    <div class="spinner"></div>
+    <p class="loader-text">Analyzing ECG Signal...</p>
+    <p class="loader-subtext">AI interpretation in progress</p>
+</div>
+
+<!-- Top Navigation Bar -->
+<header class="top-nav">
+    <div class="nav-container">
+        <div class="brand">
+            <span class="material-symbols-outlined brand-icon">monitor_heart</span>
+            <div>
+                <h1 class="brand-title">AI-POWERED CARDIAC ARRHYTHMIA PREDICTOR</h1>
+                <p class="brand-subtitle">REAL-TIME HEART SIGNAL ANALYSIS</p>
+            </div>
+        </div>
+        <div class="status-area">
+            <div class="status-pill">
+                <span class="status-led" id="statusLed"></span>
+                <span class="status-text" id="statusText">CONNECTED</span>
+            </div>
+            <div class="avatar">
+                <span class="material-symbols-outlined">account_circle</span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Dashboard Container -->
+<main class="dashboard">
+    <div class="dashboard-grid">
+        
+        <!-- LEFT PANEL: Patient Intake + File Upload -->
+        <div class="panel-left">
+            <div class="card patient-card">
+                <div class="card-header">
+                    <span class="material-symbols-outlined">person_add</span>
+                    <h3>Patient Intake</h3>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="patientName" class="form-input" placeholder="e.g., Sarah Chen, MD">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Age (years)</label>
+                    <input type="number" id="patientAge" class="form-input" placeholder="e.g., 62">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">ECG Data File</label>
+                    <div class="upload-zone" id="uploadZone">
+                        <span class="material-symbols-outlined upload-icon">cloud_upload</span>
+                        <p class="upload-text">Drag & drop or click</p>
+                        <p class="upload-hint">CSV (one value/row) or JSON array</p>
+                        <input type="file" id="fileInput" accept=".csv,.json" style="display: none;">
+                        <div class="file-badge" id="fileNameDisplay">
+                            <span>📄 No file selected</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn-primary" id="analyzeBtn">
+                    <span class="material-symbols-outlined">analytics</span>
+                    Analyze ECG
+                </button>
+            </div>
+        </div>
+        
+        <!-- RIGHT PANEL: Graph + Results + History -->
+        <div class="panel-right">
+            
+            <!-- ECG Waveform Card -->
+            <div class="ecg-card">
+                <div class="ecg-header">
+                    <div class="ecg-status">
+                        <div class="ecg-led"></div>
+                        <span class="ecg-label">LEAD II • REAL-TIME</span>
+                    </div>
+                    <span class="ecg-params">25 mm/s | 10 mm/mV</span>
+                </div>
+                <div class="ecg-canvas-wrapper">
+                    <canvas id="ecgCanvas" width="800" height="240"></canvas>
+                </div>
+                <div class="vitals-panel">
+                    <div class="vital-item">
+                        <div class="vital-label">HR</div>
+                        <div class="vital-value"><span id="hrValue">72</span><span class="vital-unit"> BPM</span></div>
+                    </div>
+                    <div class="vital-item">
+                        <div class="vital-label">PR</div>
+                        <div class="vital-value"><span id="prValue">160</span><span class="vital-unit"> ms</span></div>
+                    </div>
+                    <div class="vital-item">
+                        <div class="vital-label">QRS</div>
+                        <div class="vital-value"><span id="qrsValue">92</span><span class="vital-unit"> ms</span></div>
+                    </div>
+                    <div class="vital-item">
+                        <div class="vital-label">QTc</div>
+                        <div class="vital-value"><span id="qtcValue">410</span><span class="vital-unit"> ms</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Analysis Results Grid -->
+            <div class="results-grid">
+                <div class="result-card">
+                    <div class="result-header">
+                        <span>Prediction Result</span>
+                        <span class="material-symbols-outlined">stethoscope</span>
+                    </div>
+                    <div class="diagnosis-text" id="diagnosisText">—</div>
+                    <div id="diagnosisBadge" class="diagnosis-badge"></div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-header">
+                        <span>Confidence Score</span>
+                        <span class="material-symbols-outlined">verified</span>
+                    </div>
+                    <div><span class="confidence-percent" id="confidencePercent">0%</span></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="confidenceFill"></div>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-header">
+                        <span>Risk Level</span>
+                        <span class="material-symbols-outlined">emergency</span>
+                    </div>
+                    <div id="riskContainer"><span class="risk-placeholder">—</span></div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-header">
+                        <span>Clinical Insight</span>
+                        <span class="material-symbols-outlined">clinical_notes</span>
+                    </div>
+                    <p class="clinical-text" id="clinicalText">Awaiting ECG upload</p>
+                </div>
+            </div>
+            
+            <!-- History Table -->
+            <div class="history-card">
+                <div class="history-header">
+                    <span class="material-symbols-outlined">history</span>
+                    <h3>Recent Reports</h3>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Patient</th><th>Age</th><th>Date</th><th>Prediction</th><th>Confidence</th></tr>
+                        </thead>
+                        <tbody id="historyBody">
+                            <tr><td colspan="5" class="empty-state">No previous reports — upload ECG to start</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- JavaScript -->
+<script src="js/dashboard.js"></script>
+</body>
+</html>
