@@ -1,95 +1,126 @@
-# AI-Powered Cardiac Arrhythmia Predictor 🫀
+<div align="center">
+  <img src="https://img.icons8.com/?size=100&id=12230&format=png&color=41B883" alt="Heartbeat Icon" width="80" />
+  <h1>🫀 AI-Powered Cardiac Arrhythmia Predictor</h1>
+  <p><strong>A production-grade Clinical Decision Support System (CDSS) for continuous ECG rhythm monitoring and life-saving ML diagnostics.</strong></p>
 
-**A comprehensive, production-grade Clinical Decision Support System (CDSS) for real-time ECG arrhythmia classification using deep learning.**
+  [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+  [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-00a67d.svg?logo=fastapi)](https://fastapi.tiangolo.com/)
+  [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.14+-FF6F00.svg?logo=tensorflow)](https://www.tensorflow.org/)
+  [![Chart.js](https://img.shields.io/badge/Chart.js_&_Zoom-4.4-FF6384.svg?logo=chartdotjs)](https://www.chartjs.org/)
+</div>
 
-## Overview
+<hr>
 
-This project provides an end-to-end full-stack solution to detect and classify cardiac arrhythmias from Electrocardiogram (ECG) data. It leverages a dual-architecture deep learning strategy (1D Convolutional Neural Networks + Bi-directional LSTM) to analyze both individual waveform morphology and temporal rhythmic patterns, ensuring high precision and robust clinical insights.
+## 🚀 The Vision
 
-The platform includes a high-performance FastAPI backend for model inference and signal processing, integrated with a sleek, responsive native HTML/CSS/JS frontend dashboard. The system is designed to simulate a real-world clinical monitoring environment with real-time waveform visualization, emergency alerts, and explainable AI insights.
+Interpreting an Electrocardiogram (ECG) accurately takes years of specialized cardiology training. In emergency settings, seconds matter. **Code_of_Duty's Cardiac Arrhythmia Predictor** bridges the clinical gap by combining modern Web technologies, advanced signal preprocessing logic (`SciPy`, Wavelet Transforms), and a **Dual-Architecture Deep Learning Model** to instantly detect hidden cardiac anomalies.
 
-## Key Features
+Instead of generic React setups prone to UI-freezing, our dashboard is built on a custom, high-performance **Native JS engine**. It acts as a 1:1 digital twin to proper hospital hardware—live-streaming patient data directly into an interactive, visually stunning medical interface.
 
-- **Dual-Model Architecture:** Combines 1D-CNN (for P-QRS-T complex shape analysis) and LSTM (for long-term R-R interval rhythms).
-- **Advanced Signal Processing:** Employs multi-level Wavelet Denoising (Daubechies 4) and bandpass filtering to clean raw ECG sensor data and isolate critical diagnostic frequencies.
-- **Real-Time Clinical Dashboard:** A low-latency, modern UI built with native Web technologies and Chart.js for smooth waveform rendering without UI freezing.
-- **Explainable AI (XAI):** Provides transparent diagnostic reasoning explaining the focus of both the CNN and LSTM models.
-- **Automated Risk Assessment:** Dynamically calculates risk levels (Low, Medium, High) and triggers critical alerts for life-threatening arrhythmias like Ventricular Fibrillation (VFib).
-- **RESTful API:** A scalable FastAPI backend handling data ingestion (JSON/CSV), preprocessing, prediction, and returning structured clinical data.
+---
 
-## Tech Stack
+## ✨ Outstanding Features 
 
-* **Backend & API:** FastAPI, Uvicorn, Python 3.x
-* **Machine Learning:** TensorFlow, Keras, Scikit-Learn
-* **Signal Processing:** SciPy, PyWavelets, NumPy, Pandas
-* **Frontend:** HTML5, CSS3 (Modern Medical Theme), Vanilla JavaScript, Chart.js
+### 🧠 Dual-Sourced AI Architecture (1D-CNN + BiLSTM)
+*   **CNN Layer:** Performs detailed morphological shape analysis (analyzing P-Waves, hidden QRS distortions, and inverted T-waves).
+*   **LSTM Layer:** Calculates complex time-series context, analyzing long-term R-R interval rhythms.
+*   **Explainable AI (XAI):** Predicts between *Normal Sinus Rhythm (NSR)*, *Atrial Fibrillation (AFib)*, and devastating *Ventricular Fibrillation (VFib)* while outputting transparent confidence metrics and logical clinical explanations.
 
-## Project Structure
+### 🏥 Medical-Grade Visualization Engine
+*   **No UI Freezing:** Completely native HTML5/CSS3/Vanilla JS integration paired with lightweight `Chart.js`. 
+*   **Real-Time Trace Scrolling:** Automatically sweeps and animates a clinical 1000-point signal block forward, replicating a physical ECG monitor.
+*   **Advanced Caliper Telemetry:** Native pinch-and-zoom and panning enabled via `chartjs-plugin-zoom`, and hover-enabled micro-voltage tooltips.
+*   **Algorithmic R-Peak Highlighting:** Our custom API runs mathematical `scipy.signal.find_peaks` evaluation, instantly mapping bright red scatter-dots directly over genuine heartbeat spikes for the doctor's visual review. 
+
+### 📐 Rigorous Signal Preprocessing
+Raw biomedical data is notoriously noisy. Our FastAPI backend processes incoming data pipelines with:
+*   Multi-level **Daubechies 4 (db4) Wavelet Denoising**.
+*   **Bandpass Filtering** (Nyquist theorems) targeted precisely to critical heart frequencies.
+*   Z-score Amplitude Normalization to cleanly stabilize wandering baseline inputs.
+
+---
+
+## 🛠️ Technology Stack
+
+| Domain | Technology |
+| :--- | :--- |
+| **Backend & API** | FastAPI, Uvicorn, Python |
+| **Core Machine Learning** | TensorFlow, Keras, Scikit-Learn |
+| **Biomedical DSP** | SciPy (`find_peaks`, filters), PyWavelets, NumPy |
+| **Frontend UI** | HTML5, Modern CSS Variables (Dark Matrix Theme), Vanilla JS |
+| **Chart Rendering** | Chart.js, Hammer.js (Gestures), Chart.js Zoom Plugin |
+
+---
+
+## 📂 Architecture Mapping
 
 ```text
 Code_of_Duty/
-├── frontend/             # Real-time dashboard interface
-│   ├── css/              # Stylesheets including dashboard.css
-│   ├── js/               # Interactive logic, API integration, chart rendering
-│   └── index.html        # Main dashboard view
-├── dataset/              # Training datasets (CSV)
-├── main.py               # FastAPI application, prediction endpoints, signal processing
-├── train_model.py        # Model definition, training loop, evaluation, and saving
-├── evaluate.py           # Model evaluation scripts
-├── classes.npy           # Encoded classes for the model prediction
-├── ecg_model.keras       # Pre-trained core model
-└── README.md             # Project documentation
+├── frontend/             # High-performance native render environment
+│   ├── css/              # Dark medical monitor styling & animations
+│   ├── js/                 # Asynchronous fetch, Chart.js looping, scaling
+│   └── index.html        # Main Clinical Viewport
+├── dataset/              # Training/validation ECG arrays (.csv)
+├── main.py               # 🚀 FastAPI application & DSP signal smoothing endpoints
+├── train_model.py        # Keras Sequential DL model training routines
+├── evaluate.py           # Scikit-learn confusion matrix generator
+├── classes.npy           # Target labels matrix
+├── ecg_model.keras       # The serialized 1D-CNN+LSTM weights tracker
+└── dummy_signal.json     # Demo validation baseline tests
 ```
 
-## Setup and Installation
+---
 
-### Prerequisites
+## 💻 Setup & Deployment
 
-Ensure you have Python 3.8+ installed.
+### 1. Requirements
 
-### 1. Clone or Open the Repository
-Navigate to the project directory:
+Ensure you are running Python 3.8+ or higher. A GPU environment (CUDA) is highly recommended if you intend to re-train the models.
+
+### 2. Prepare the Environment
+
+Clone the repository and install the biomedical/backend dependencies:
 ```bash
-cd path/to/Code_of_Duty
-```
-
-### 2. Install Dependencies
-Install the required Python packages:
-```bash
+cd Code_of_Duty
 pip install fastapi uvicorn tensorflow pandas numpy scipy PyWavelets scikit-learn matplotlib seaborn
 ```
 
-### 3. Start the Backend Server
-Run the FastAPI application using Uvicorn:
+### 3. Ignition / Run the Server 
+
+Since the frontend is served entirely through FastAPI's StaticFiles module, a single command deploys the complete stack.
 ```bash
-python main.py
-# or
+python3 main.py
+# OR
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
-The server will start on `http://localhost:8000`.
+Open your browser and navigate to: **[`http://localhost:8000`](http://localhost:8000)**
 
-### 4. Access the Dashboard
-Open your web browser and navigate to:
-```
-http://localhost:8000
-```
+---
 
-## Usage
+## 🔬 How to Use the Predictor
 
-1. **Patient Intake:** Enter the patient's name and age on the left panel.
-2. **File Upload:** Drag and drop an ECG data file (`.csv` or `.json`) or use the built-in demo simulations (Normal, AFib, VFib).
-3. **Analyze:** Click "Analyze ECG". The frontend sends the required data to the `/predict` FastAPI endpoint.
-4. **Clinical Review:** Observe the real-time ECG waveform, dual-model predictions (CNN + LSTM), confidence meter, risk level, and explainable AI reasoning on the dashboard.
+1.  **Patient Triaging:** Register dummy metadata on the left pipeline control.
+2.  **Telemetry Data Input:** Drag and drop an external `.json` or `.csv` array directly into the portal, OR hit one of our **Live Demo Simulations** (`Normal`, `AFib`, `VFib`) which stream chaotic math-generated waves directly into the backend for authentic modeling.
+3.  **Real-Time Review:** Watch the signal render. Zoom into noisy sections or inspect highlighted QRS peaks with hover measurements.
+4.  **Clinical Interpretation:** Look at the generated right-side panel. It displays combined CNN/LSTM results, disagreement warnings (if the models argue), total risk meters, and action-oriented clinical insights!
 
-## Model Training
+---
 
-To retrain the model with a custom dataset:
-1. Place your dataset in `dataset/ecg_dataset.csv`. The expected format requires `signal` (array of values) and `label` (class name).
-2. Run the training script:
+## 📈 Model Resampling & Retraining
+
+We include a pure-Python training pipeline for data scientists seeking to boost parameters or swap architectures.
+
+To start completely fresh:
+1. Place standard formatted arrays inside `dataset/ecg_dataset.csv`.
+2. Execute the deep-learning orchestrator:
 ```bash
 python train_model.py
 ```
-This script will preprocess the data, train the 1D-CNN + LSTM hybrid model with Focal Loss, generate a confusion matrix (`confusion_matrix.png`), and save the new `.keras` model and class encoding (`classes.npy`).
+This triggers data reshaping, automatic Focal-Loss handling, EarlyStopping callbacks, and renders the latest prediction matrix (`confusion_matrix.png`) automatically upon finish. 
 
-## Disclaimer
-*This system is intended for educational, research, and demonstration purposes. It is not currently certified as a medical device by regulatory bodies (e.g., FDA). Clinical decisions must ultimately be made by qualified healthcare professionals.*
+---
+
+<br>
+<p align="center">
+  <i>Disclaimer: This software was developed primarily for education, ML demonstration, and Hackathons. It is NOT FDA-Approved diagnostic software and should always be superseded by the judgment of licensed cardiologists.</i>
+</p>
