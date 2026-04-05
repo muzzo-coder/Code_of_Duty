@@ -1,242 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Cardiac AI Monitor | Clinical ECG System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-POWERED CARDIAC ARRHYTHMIA PREDICTOR | Dual Model Analysis</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     
-    <!-- External Fonts & Libraries -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1" />
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
+
     <link rel="stylesheet" href="css/dashboard.css">
 </head>
-<body>
 
-<!-- Critical Alert Toast with Blinking Border -->
-<div class="alert-toast" id="criticalToast">
-    <div class="flex items-start gap-3">
-        <span class="material-symbols-outlined" style="color: var(--risk-high); font-size: 1.5rem;">warning</span>
-        <div style="flex: 1;">
-            <h4 style="font-weight: 700; color: var(--risk-high);">⚠️ High Risk Detected</h4>
-            <p id="toastMessage" style="font-size: 0.85rem;">Immediate clinical attention required.</p>
+<body class="medical-theme">
+
+    <div id="alertBox" class="alert-overlay hidden">
+        <div class="alert-content">
+            <span class="material-symbols-outlined alert-icon">warning</span>
+            <h2>CRITICAL ALERT</h2>
+            <p id="alertMessage">High Risk Level Detected. Patient requires immediate clinical attention.</p>
+            <button onclick="closeAlert()" class="btn-alert-close">Acknowledge</button>
         </div>
-        <button onclick="closeAlert()" style="background: none; border: none; cursor: pointer;">✕</button>
     </div>
-    <audio id="alertBeep" preload="auto">
-        <source src="https://www.soundjay.com/misc/sounds/beep-07.mp3" type="audio/mpeg">
-    </audio>
-</div>
 
-<!-- Top Navigation -->
-<header class="top-nav">
-    <div class="nav-container">
-        <div class="brand">
-            <span class="material-symbols-outlined brand-icon">monitor_heart</span>
-            <div>
-                <h1 class="brand-title">AI-POWERED CARDIAC ARRHYTHMIA PREDICTOR</h1>
-                <p class="brand-subtitle">REAL-TIME HEART SIGNAL ANALYSIS</p>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="material-symbols-outlined brand-icon">ecg</span>
+            <div class="brand-text">
+                <h1>AI-POWERED CARDIAC ARRHYTHMIA PREDICTOR</h1>
+                <p>Dual Model ECG Analysis (CNN + LSTM)</p>
             </div>
         </div>
-        <div class="flex items-center gap-2">
-            <div class="status-pill">
-                <span class="status-led" id="statusLed"></span>
-                <span class="status-text" id="statusText">CONNECTED</span>
-            </div>
-            <button class="dark-mode-toggle" id="darkModeToggle">
-                <span class="material-symbols-outlined">dark_mode</span>
-                <span>ICU Mode</span>
+        <div class="nav-status">
+            <button id="themeToggle" class="btn-theme-toggle" title="Toggle Dark/Light Mode">
+                <span class="material-symbols-outlined" id="themeIcon">dark_mode</span>
             </button>
+            <span id="statusIndicator" class="status-dot online"></span>
+            <span id="statusText">System Ready</span>
         </div>
-    </div>
-</header>
+    </nav>
 
-<!-- Main Dashboard -->
-<main class="dashboard">
-    <div class="dashboard-grid">
+    <main class="app-container">
         
-        <!-- LEFT PANEL -->
-        <div class="space-y-4">
-            <!-- Patient Summary Card -->
-            <div class="card patient-summary">
-                <div class="card-header">
-                    <span class="material-symbols-outlined">patient_info</span>
+        <section class="panel panel-left">
+            <div class="panel-header">
+                <span class="material-symbols-outlined">person_add</span>
+                <h2>Patient Intake</h2>
+            </div>
+            <div class="input-group">
+                <label for="patientName">Patient Name</label>
+                <input type="text" id="patientName" placeholder="Enter Full Name">
+            </div>
+            <div class="input-group">
+                <label for="patientAge">Patient Age</label>
+                <input type="number" id="patientAge" placeholder="Enter Age">
+            </div>
+            <div class="input-group">
+                <label>ECG Signal File</label>
+                <div class="file-drop-zone" id="dropZone">
+                    <span class="material-symbols-outlined"
+                        style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">cloud_upload</span>
+                    <p>Drag & drop or <span class="browse">browse</span></p>
+                    <input type="file" id="fileInput" accept=".csv,.json" class="hidden">
+                    <div id="fileStatus" class="file-status">No file chosen</div>
                 </div>
-                <div>
-                    <h3>Patient Summary</h3>
-                    <p><strong>Name:</strong> <span id="summaryName">—</span></p>
-                    <p><strong>Age:</strong> <span id="summaryAge">—</span> years</p>
-                    <p><strong>Status:</strong> <span id="summaryStatus" class="text-warning">Awaiting Analysis</span></p>
-                    <p><strong>Last Updated:</strong> <span id="summaryTime">—</span></p>
+            </div>
+            <button id="analyzeBtn" class="btn-primary">
+                <span>Analyze ECG</span>
+                <span class="material-symbols-outlined">analytics</span>
+            </button>
+
+            <div class="demo-actions">
+                <p>Demo Simulation:</p>
+                <div class="demo-buttons">
+                    <button onclick="loadDemo('Normal')" class="btn-demo normal">Normal</button>
+                    <button onclick="loadDemo('AFib')" class="btn-demo warning">AFib</button>
+                    <button onclick="loadDemo('VFib')" class="btn-demo danger">VFib</button>
                 </div>
-                
-                <!-- Visual Risk Meter -->
-                <div class="risk-meter-container">
-                    <div class="risk-scale">
+            </div>
+        </section>
+
+        <section class="panel panel-center">
+            <div class="panel-header">
+                <span class="material-symbols-outlined">monitor_heart</span>
+                <h2>Real-time ECG Waveform</h2>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="ecgChart"></canvas>
+                <div class="chart-overlay">
+                    <div class="grid-line"></div>
+                </div>
+            </div>
+            <div class="signal-metrics">
+                <div class="metric">
+                    <span class="label">LEAD II</span>
+                    <span class="value">Active</span>
+                </div>
+                <div class="metric">
+                    <span class="label">FREQ</span>
+                    <span class="value">250Hz</span>
+                </div>
+                <div class="metric">
+                    <span class="label">BPM</span>
+                    <span id="bpmValue" class="value">--</span>
+                </div>
+            </div>
+
+            <div class="data-flow-section">
+                <h3>Data Pipeline Flow</h3>
+                <div class="pipeline-track">
+                    
+                    <div class="flow-node" id="node-1">
+                        <span class="material-symbols-outlined node-icon">person_add</span>
+                        <span class="node-label">Patient Input</span>
+                        <div class="node-sublabel">Name, Age, File</div>
+                    </div>
+                    <span class="material-symbols-outlined flow-arrow">arrow_forward_ios</span>
+
+                    <div class="flow-node" id="node-2">
+                        <span class="material-symbols-outlined node-icon">auto_fix_high</span>
+                        <span class="node-label">Wavelet Denoising</span>
+                        <div class="node-sublabel">Multi-level DWT (db4)</div>
+                    </div>
+                    <span class="material-symbols-outlined flow-arrow">arrow_forward_ios</span>
+
+                    <div class="flow-node" id="node-3">
+                        <span class="material-symbols-outlined node-icon">query_stats</span>
+                        <span class="node-label">Feature Extraction</span>
+                        <div class="node-sublabel">Waveform Patterns</div>
+                    </div>
+                    <span class="material-symbols-outlined flow-arrow">arrow_forward_ios</span>
+
+                    <div class="flow-node" id="node-4">
+                        <span class="material-symbols-outlined node-icon">memory</span>
+                        <span class="node-label">Model Processing</span>
+                        <div class="node-sublabel">CNN + LSTM Patterns</div>
+                    </div>
+                    <span class="material-symbols-outlined flow-arrow">arrow_forward_ios</span>
+
+                    <div class="flow-node" id="node-5">
+                        <span class="material-symbols-outlined node-icon">online_prediction</span>
+                        <span class="node-label">Prediction Layer</span>
+                        <div class="node-sublabel">Dual Model Outcome</div>
+                    </div>
+                    <span class="material-symbols-outlined flow-arrow">arrow_forward_ios</span>
+
+                    <div class="flow-node" id="node-6">
+                        <span class="material-symbols-outlined node-icon">merge_type</span>
+                        <span class="node-label">Decision Fusion</span>
+                        <div class="node-sublabel">Final Logical Decision</div>
+                    </div>
+                    <span class="material-symbols-outlined flow-arrow">arrow_forward_ios</span>
+
+                    <div class="flow-node" id="node-7">
+                        <span class="material-symbols-outlined node-icon">clinical_notes</span>
+                        <span class="node-label">Output Display</span>
+                        <div class="node-sublabel">Diagnosis & Insights</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel panel-right">
+            <div class="panel-header">
+                <span class="material-symbols-outlined">description</span>
+                <h2>Clinical Analysis</h2>
+            </div>
+
+            <div class="result-card">
+                <h3>Patient Identity</h3>
+                <div class="patient-details">
+                    <p>Name: <span id="displayName" class="highlight">--</span></p>
+                    <p>Age: <span id="displayAge" class="highlight">--</span></p>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <h3>Dual Model Insights</h3>
+                <div class="model-results">
+                    <div class="model-item">
+                        <span class="label">CNN (Shape Analysis):</span>
+                        <span id="cnnResult" class="value">--</span>
+                    </div>
+                    <div class="model-item">
+                        <span class="label">LSTM (Temporal Rhythm):</span>
+                        <span id="lstmResult" class="value">--</span>
+                    </div>
+                    <div class="model-item final">
+                        <span class="label">Final Decision:</span>
+                        <span id="finalResult" class="value">--</span>
+                    </div>
+                    <div id="disagreementWarning" class="warning-text hidden">
+                        <span class="material-symbols-outlined">warning</span>
+                        Model disagreement detected. Manual review recommended.
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <h3>Confidence Level</h3>
+                <div class="confidence-container">
+                    <span id="confidencePercent" class="confidence-value">0%</span>
+                    <div class="progress-bar">
+                        <div id="confidenceBar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <h3>Clinical Risk Assessment</h3>
+                <div id="riskContainer" class="risk-display">LOW</div>
+                <div class="risk-meter-wrapper">
+                    <input type="range" id="riskMeter" min="0" max="100" value="0" disabled>
+                    <div class="meter-labels">
                         <span>LOW</span>
-                        <span>MODERATE</span>
+                        <span>MED</span>
                         <span>HIGH</span>
                     </div>
-                    <div class="risk-bar-bg">
-                        <div class="risk-indicator" id="riskIndicator" style="left: 0%;"></div>
-                    </div>
-                </div>
-                
-                <!-- Signal Quality Indicator -->
-                <div class="signal-quality" id="signalQuality">
-                    <div class="signal-dot signal-good"></div>
-                    <span style="font-size: 0.8rem;">Signal Quality: <strong id="signalText">GOOD</strong></span>
                 </div>
             </div>
-            
-            <!-- Patient Intake -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="material-symbols-outlined">person_add</span>
-                    <h3>Patient Intake</h3>
-                </div>
-                <input type="text" id="patientName" class="form-input" placeholder="Full Name" style="margin-bottom: 0.75rem;">
-                <input type="number" id="patientAge" class="form-input" placeholder="Age (years)" style="margin-bottom: 0.75rem;">
-                
-                <div class="upload-zone" id="uploadZone">
-                    <span class="material-symbols-outlined">cloud_upload</span>
-                    <p>Drag & drop or click</p>
-                    <p style="font-size: 0.7rem;">CSV or JSON</p>
-                    <input type="file" id="fileInput" accept=".csv,.json" style="display: none;">
-                    <div class="file-badge" id="fileNameDisplay" style="margin-top: 0.5rem; font-size: 0.75rem;">📄 No file selected</div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem;">
-                    <button class="btn-primary" id="analyzeBtn">
-                        <span class="material-symbols-outlined">analytics</span> Analyze ECG
-                    </button>
-                    <button onclick="runAccuracyTests()" style="background: #2a9d8f; border: none; color: white; padding: 0.75rem 1rem; border-radius: 0.5rem; cursor: pointer; font-weight: 600;">
-                        <span class="material-symbols-outlined" style="font-size: 1.2rem;">test_tubes</span> Test Accuracy
-                    </button>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
-                    <button onclick="loadDemoNormal()" style="background: #06a77d; border: none; color: white; padding: 0.5rem 0.75rem; border-radius: 0.4rem; cursor: pointer; font-size: 0.8rem; font-weight: 500;">
-                        <span class="material-symbols-outlined" style="font-size: 1rem;">heart_check</span> Normal
-                    </button>
-                    <button onclick="loadDemoAFib()" style="background: #f4a261; border: none; color: white; padding: 0.5rem 0.75rem; border-radius: 0.4rem; cursor: pointer; font-size: 0.8rem; font-weight: 500;">
-                        <span class="material-symbols-outlined" style="font-size: 1rem;">warning</span> AFib
-                    </button>
-                    <button onclick="loadDemoVFib()" style="background: #e76f51; border: none; color: white; padding: 0.5rem 0.75rem; border-radius: 0.4rem; cursor: pointer; font-size: 0.8rem; font-weight: 500;">
-                        <span class="material-symbols-outlined" style="font-size: 1rem;">emergency</span> VFib
-                    </button>
+
+            <div class="result-card">
+                <h3>Clinical Observations</h3>
+                <p id="clinicalText" class="insight-text">System awaiting ECG input for analysis...</p>
+            </div>
+
+            <div class="result-card xai-panel">
+                <h3>Explainable AI (XAI)</h3>
+                <div id="aiReason" class="xai-text">
+                    <p>• <strong>CNN:</strong> Focuses on individual waveform morphology (P-QRS-T complexes).</p>
+                    <p>• <strong>LSTM:</strong> Analyzes R-R intervals and long-term rhythm patterns.</p>
                 </div>
             </div>
-            
-            <!-- Doctor Notes -->
-            <div class="card doctor-notes">
-                <div class="card-header">
-                    <span class="material-symbols-outlined">edit_note</span>
-                    <h3>Doctor's Notes</h3>
-                </div>
-                <textarea rows="3" placeholder="Enter clinical observations..."></textarea>
-            </div>
-        </div>
-        
-        <!-- RIGHT PANEL -->
-        <div class="space-y-4">
-            <!-- ECG Waveform with Real-time Animation -->
-            <div class="ecg-card">
-                <div class="ecg-header" style="padding: 0.75rem 1rem; background: var(--ecg-header); display: flex; justify-content: space-between;">
-                    <div class="flex items-center gap-2">
-                        <div class="status-led" style="background: #e63946; animation: pulse 1.5s infinite;"></div>
-                        <span style="color: white; font-size: 0.7rem;">LEAD II • REAL-TIME</span>
-                    </div>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <button id="animateBtn" style="background: rgba(255,255,255,0.1); border: none; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; cursor: pointer;">▶ Animate</button>
-                        <button id="stopBtn" style="background: rgba(255,255,255,0.1); border: none; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; cursor: pointer;">⏹ Stop</button>
-                    </div>
-                </div>
-                <div class="ecg-canvas-wrapper">
-                    <canvas id="ecgCanvas" width="800" height="240"></canvas>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(4,1fr); gap: 0.5rem; background: #102c38; padding: 0.5rem 1rem;">
-                    <div><div style="font-size: 0.6rem; color: #8db2c4;">HR</div><div style="font-size: 1.2rem; font-weight: 700; color: white;" id="hrValue">72 <span style="font-size: 0.7rem;">BPM</span></div></div>
-                    <div><div style="font-size: 0.6rem; color: #8db2c4;">PR</div><div style="font-size: 1.2rem; font-weight: 700; color: white;" id="prValue">160 <span style="font-size: 0.7rem;">ms</span></div></div>
-                    <div><div style="font-size: 0.6rem; color: #8db2c4;">QRS</div><div style="font-size: 1.2rem; font-weight: 700; color: white;" id="qrsValue">92 <span style="font-size: 0.7rem;">ms</span></div></div>
-                    <div><div style="font-size: 0.6rem; color: #8db2c4;">QTc</div><div style="font-size: 1.2rem; font-weight: 700; color: white;" id="qtcValue">410 <span style="font-size: 0.7rem;">ms</span></div></div>
-                </div>
-            </div>
-            
-            <!-- Results Grid -->
-            <div class="results-grid">
-                <div class="card">
-                    <div class="flex justify-between items-center">
-                        <span style="font-size: 0.7rem;">Prediction</span>
-                        <span class="material-symbols-outlined">stethoscope</span>
-                    </div>
-                    <div style="font-size: 1.8rem; font-weight: 800;" id="diagnosisText">—</div>
-                    <div id="diagnosisBadge" class="mt-2"></div>
-                </div>
-                
-                <div class="card">
-                    <div class="flex justify-between items-center">
-                        <span style="font-size: 0.7rem;">Confidence</span>
-                        <span class="material-symbols-outlined">verified</span>
-                    </div>
-                    <div><span style="font-size: 1.5rem; font-weight: 700;" id="confidencePercent">0%</span></div>
-                    <div style="background: var(--bg-primary); height: 6px; border-radius: 3px; margin-top: 0.5rem;">
-                        <div id="confidenceFill" style="width: 0%; height: 100%; background: var(--primary-teal); border-radius: 3px;"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Explainable AI Panel + Multi-Model -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="material-symbols-outlined">psychology</span>
-                    <h3>AI Explanation & Ensemble Results</h3>
-                </div>
-                <div id="explanationPanel">
-                    <div class="explanation-item">🔍 <strong>Reason:</strong> <span id="explainReason">Awaiting analysis</span></div>
-                    <div class="explanation-item">📊 <strong>CNN Model:</strong> <span id="cnnResult">—</span></div>
-                    <div class="explanation-item">🔄 <strong>LSTM Model:</strong> <span id="lstmResult">—</span></div>
-                    <div class="explanation-item">✅ <strong>Ensemble Final:</strong> <span id="ensembleResult">—</span></div>
-                </div>
-            </div>
-            
-            <!-- Clinical Insight + Download -->
-            <div class="card">
-                <div class="flex justify-between items-center mb-2">
-                    <div class="card-header" style="margin-bottom: 0;">
-                        <span class="material-symbols-outlined">clinical_notes</span>
-                        <h3>Clinical Insight</h3>
-                    </div>
-                    <button class="btn-download" id="downloadReportBtn">
-                        <span class="material-symbols-outlined" style="font-size: 1rem;">download</span> Report PDF
-                    </button>
-                </div>
-                <p id="clinicalText" style="font-style: italic;">Awaiting ECG upload</p>
-            </div>
-            
-            <!-- History with Trend Graph -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="material-symbols-outlined">history</span>
-                    <h3>Patient History & Risk Trend</h3>
-                </div>
-                <canvas id="trendCanvas" height="60" style="width: 100%; height: 60px;"></canvas>
-                <div class="table-wrapper" style="overflow-x: auto; margin-top: 1rem;">
-                    <table class="data-table">
-                        <thead><tr><th>Patient</th><th>Date</th><th>Prediction</th><th>Risk</th></tr></thead>
-                        <tbody id="historyBody"><tr><td colspan="4" class="empty-state">No previous reports</td></tr></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
+        </section>
+    </main>
+
+    <footer class="bottom-bar">
+        <p>© 2026 Cardiac AI Monitor | Professional Clinical Decision Support Tool</p>
+    </footer>
 
     <script src="js/dashboard.js"></script>
-    <script src="js/api_integration.js"></script>
-   
 </body>
+
 </html>
